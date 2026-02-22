@@ -1,0 +1,172 @@
+{
+  "name": "Blog-Scraper",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        272
+      ],
+      "id": "b99d178f-e5b8-4c41-a3db-7fd8bc8f37d1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        80
+      ],
+      "id": "cdddc115-1d00-494b-a0c8-0820c51b82cd",
+      "name": "Telegram Trigger",
+      "webhookId": "486e428a-fcfe-43fb-aa54-ce4522362b68",
+      "credentials": {
+        "telegramApi": {
+          "id": "uSrW358DczLFvtNe",
+          "name": "blog-scraper"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://rabeehasan.online/blog/fetch",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1024,
+        176
+      ],
+      "id": "2c1bfca8-8199-4dbf-971c-df0ac42caf53",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the posts array\nconst posts = $input.first().json.posts;\n\n// 2. Create your formatted string\nconst formattedString = posts.map(item => \"🔹 \" + item.title + \"-\" +  \"[Click here]\" + \"(\" + item.url + \")\").join('\\n');\n\n// 3. RETURN AN OBJECT (This satisfies n8n)\nreturn {\n  message: formattedString\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        176
+      ],
+      "id": "19883c1b-d659-45e6-901a-cfad64791b15",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.first().json.message;\n\nreturn {\n  message: message,\n  buttons: {\n    inline_keyboard: [\n      [\n        { \"text\": \"🚀 Open Website\", \"url\": \"https://example.com\" },\n        { \"text\": \"📝 Blog\", \"url\": \"https://example.com/blog\" }\n      ],\n      [\n        { \"text\": \"🤖 Bot Info\", \"url\": \"https://t.me/botfather\" }\n      ]\n    ]\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        176
+      ],
+      "id": "8232b2c3-b3ae-4274-8c03-ec105e987180",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8515581946:AAGsQ8NwZdcQOxvH-_94EncIn6UtUKWV3ps/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $('Telegram Trigger').item.json.message.from.id }}\",\n  \"text\": \"Choose an option:\",\n  \"reply_markup\": {\n     \"inline_keyboard\": {{ JSON.stringify($json.buttons.inline_keyboard\n)}}\n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1744,
+        176
+      ],
+      "id": "5ebef245-468e-4ff8-96ea-fade72fd9ec7",
+      "name": "send options to user"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "send options to user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "1f48376d-5b48-458b-af87-fcea731dbc0d",
+  "meta": {
+    "instanceId": "582bb7ea81a9757591d8011425cf96d0e79faf17dc6ac58ad3403ec4d8ba780c"
+  },
+  "id": "CRIk31N4_sIBRsd0Xp3ux",
+  "tags": []
+}
