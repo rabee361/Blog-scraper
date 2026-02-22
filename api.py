@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from main import fetch_rss, scrape_page, run_all_scrapers
 import uvicorn
 
-app = FastAPI(title="Blog Scraper API")
+app = FastAPI(title="Blog Scraper API", root_path="/blog")
 
 @app.get("/")
 def read_root():
