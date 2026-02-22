@@ -1,0 +1,15 @@
+{
+    "rss": [
+        {
+            "name": "Package Main",
+            "url": "https://packagemain.tech/feed"
+        }
+    ],
+    "web": [
+        {
+            "name": "Example Playwright Blog",
+            "url": "https://packagemain.tech/blog",
+            "selector": "a.post-card-content-link"
+        }
+    ]
+}
