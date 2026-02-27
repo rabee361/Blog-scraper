@@ -11,9 +11,11 @@ def fetch_rss(feed_url):
     
     # Try common RSS suffixes if not already present
     base_url = feed_url.rstrip('/')
-    if not (base_url.endswith('/feed') or base_url.endswith('/rss') or base_url.endswith('/xml')):
+    if not (base_url.endswith('/feed') or base_url.endswith('/rss') or base_url.endswith('/xml') or base_url.endswith('/index.xml')):
         urls_to_try.append(f"{base_url}/feed")
         urls_to_try.append(f"{base_url}/rss")
+        urls_to_try.append(f"{base_url}/xml")
+        urls_to_try.append(f"{base_url}/index.xml")
 
     for url in urls_to_try:
         try:
