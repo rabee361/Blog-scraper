@@ -25,9 +25,9 @@ def get_sources():
         raise HTTPException(status_code=500, detail=f"Error reading sources.json: {str(e)}")
 
 @app.get("/fetch")
-def fetch_all():
-    """Fetch all blog posts from sources.json."""
-    results = run_all_scrapers()
+def fetch_all(source: str = Query(None, description="The name of the source to fetch from")):
+    """Fetch blog posts from sources.json, optionally filtered by source name."""
+    results = run_all_scrapers(source_name=source)
     if isinstance(results, dict) and "error" in results:
         raise HTTPException(status_code=500, detail=results["error"])
     return {"posts": results}

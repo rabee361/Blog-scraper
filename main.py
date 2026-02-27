@@ -62,8 +62,8 @@ def scrape_page(page_url, selector):
         
     return results
 
-def run_all_scrapers(config_path='sources.json'):
-    """Run all scrapers based on the configuration file."""
+def run_all_scrapers(config_path='sources.json', source_name=None):
+    """Run all scrapers based on the configuration file, or a specific source name."""
     if not os.path.exists(config_path):
         return {"error": "Configuration file not found"}
 
@@ -77,13 +77,17 @@ def run_all_scrapers(config_path='sources.json'):
 
     # Process RSS
     for source in sources.get('rss', []):
+        if source_name and source_name.lower() not in source['name'].lower():
+            continue
         posts = fetch_rss(source['url'])
         all_posts.extend(posts)
 
-    # Process Web (Note: Scraping is still commented out as per the USER's recent modification)
-    # for source in sources.get('web', []):
-    #     posts = scrape_page(source['url'], source['selector'])
-    #     all_posts.extend(posts)
+    # Process Web
+    for source in sources.get('web', []):
+        if source_name and source_name.lower() not in source['name'].lower():
+            continue
+        posts = scrape_page(source['url'], source['selector'])
+        all_posts.extend(posts)
 
     return all_posts
 
