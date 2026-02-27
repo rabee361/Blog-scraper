@@ -3,13 +3,12 @@
         {
             "name": "Package Main",
             "url": "https://packagemain.tech/feed"
+        },
+        {
+            "name": "Three Dots Lab",
+            "url": "https://threedots.tech/index.xml"
         }
     ],
     "web": [
-        {
-            "name": "Example Playwright Blog",
-            "url": "https://packagemain.tech/blog",
-            "selector": "a.post-card-content-link"
-        }
     ]
 }

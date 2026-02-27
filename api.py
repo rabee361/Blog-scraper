@@ -1,12 +1,28 @@
 from fastapi import FastAPI, HTTPException, Query
 from main import fetch_rss, scrape_page, run_all_scrapers
 import uvicorn
+import json
+import os
 
 app = FastAPI(title="Blog Scraper API", root_path="/blog")
 
 @app.get("/")
 def read_root():
     return {"message": "Blog Scraper API is running on port 4040"}
+
+@app.get("/sources")
+def get_sources():
+    """Return the content of the sources.json file."""
+    sources_path = "sources.json"
+    if not os.path.exists(sources_path):
+        raise HTTPException(status_code=404, detail="sources.json file not found")
+    
+    try:
+        with open(sources_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading sources.json: {str(e)}")
 
 @app.get("/fetch")
 def fetch_all():
