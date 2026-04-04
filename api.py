@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, Query
-from main import fetch_rss, scrape_page, run_all_scrapers
+from fastapi import Body, FastAPI, HTTPException, Query
+from fastapi.responses import PlainTextResponse, Response
+from main import build_offline_html, decode_post_payload, fetch_rss, normalize_post, scrape_page, run_all_scrapers
 import uvicorn
 import json
 import os
@@ -48,6 +49,38 @@ def get_scrape(url: str = Query(..., description="The page URL to scrape"),
     if not posts:
         return {"message": "No posts found or failed to scrape", "posts": []}
     return {"posts": posts}
+
+def create_download_response(offline_page):
+    headers = {
+        "Content-Disposition": f'attachment; filename="{offline_page["filename"]}"'
+    }
+    return Response(
+        content=offline_page["content"],
+        media_type="text/html; charset=utf-8",
+        headers=headers,
+    )
+
+@app.get("/download")
+async def download_post(payload: str = Query(..., description="Base64-url encoded post payload")):
+    try:
+        post = decode_post_payload(payload)
+        offline_page = await build_offline_html(post)
+        return create_download_response(offline_page)
+    except ValueError as exc:
+        return PlainTextResponse(str(exc), status_code=400)
+    except Exception as exc:
+        return PlainTextResponse(str(exc), status_code=500)
+
+@app.post("/download")
+async def download_post_from_body(post: dict = Body(..., description="Full post object to download offline")):
+    try:
+        normalized_post = normalize_post(post)
+        offline_page = await build_offline_html(normalized_post)
+        return create_download_response(offline_page)
+    except ValueError as exc:
+        return PlainTextResponse(str(exc), status_code=400)
+    except Exception as exc:
+        return PlainTextResponse(str(exc), status_code=500)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=4040)

@@ -5,3 +5,4 @@ feedparser
 requests
 fastapi
 uvicorn
+pagesnap

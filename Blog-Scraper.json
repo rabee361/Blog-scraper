@@ -1,0 +1,732 @@
+{
+  "name": "Blog-Scraper",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://rabeehasan.online/blog/fetch",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "={{ $('Telegram Trigger').item.json.message.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1728,
+        176
+      ],
+      "id": "2c1bfca8-8199-4dbf-971c-df0ac42caf53",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawSources = Array.isArray($input.first().json.sources) ? $input.first().json.sources : [];\nconst labels = rawSources\n  .map((item) => {\n    if (typeof item === 'string') {\n      return item;\n    }\n\n    return item.text || item.name || '';\n  })\n  .filter(Boolean);\n\nconst keyboard = [];\n\nfor (let index = 0; index < labels.length; index += 2) {\n  keyboard.push(labels.slice(index, index + 2));\n}\n\nreturn {\n  message: 'Choose a website:',\n  buttons: {\n    keyboard\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        -16
+      ],
+      "id": "8232b2c3-b3ae-4274-8c03-ec105e987180",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8515581946:AAGsQ8NwZdcQOxvH-_94EncIn6UtUKWV3ps/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $('Telegram Trigger').item.json.message.from.id }}\",\n  \"text\": \"Choose an option:\",\n  \"reply_markup\": {\n     \"inline_keyboard\": {{ JSON.stringify($json.buttons.inline_keyboard\n)}}\n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        880,
+        352
+      ],
+      "id": "5ebef245-468e-4ff8-96ea-fade72fd9ec7",
+      "name": "send options to user"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        80
+      ],
+      "id": "cdddc115-1d00-494b-a0c8-0820c51b82cd",
+      "name": "Telegram Trigger",
+      "webhookId": "486e428a-fcfe-43fb-aa54-ce4522362b68",
+      "credentials": {
+        "telegramApi": {
+          "id": "uSrW358DczLFvtNe",
+          "name": "blog-scraper"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://rabeehasan.online/blog/sources",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        832,
+        80
+      ],
+      "id": "d6b290dd-3af2-4fe8-a0f8-6a06f524c711",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  message: 'Choose an option:',\n  buttons: {\n    keyboard: [\n      ['Fetch blog posts'],\n      ['Download HTML pages']\n    ]\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -144
+      ],
+      "id": "1c7b02e9-7d03-4b99-94c8-bbf4987d2074",
+      "name": "Build Start Menu"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c8ef0fc9-8ea9-451f-b8c4-584478e00f48",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+              "rightValue": "Fetch blog posts",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1280,
+        80
+      ],
+      "id": "8df10f8a-0d82-4dd2-b1d8-c5023e2f7258",
+      "name": "If Fetch Blog Posts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f519e28a-4b7d-4bc9-a465-ee2f4dc2242e",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+              "rightValue": "Download HTML pages",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1504,
+        80
+      ],
+      "id": "f8f2cfb8-b6f2-47d2-9696-d7fcc425a4a2",
+      "name": "If Download HTML Pages"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f31c61de-aa29-4f5d-a13a-0e3268b49134",
+              "name": "sources",
+              "value": "={{ [...$json.web, ...$json.rss].map(item => 'Download HTML :: ' + item.name) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1728,
+        80
+      ],
+      "id": "8a9b0d0b-d620-49a9-8e3d-02b830e4ef79",
+      "name": "Edit Fields Download Sources"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e8128a18-1a46-4d9d-8079-159d3652f04c",
+              "name": "sources",
+              "value": "={{ [...$json.web, ...$json.rss].map(item => 'Download HTML :: ' + item.name) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1728,
+        304
+      ],
+      "id": "1d5886de-55bf-4ecf-b5fc-c2fdab64abf0",
+      "name": "Edit Fields Download Sources2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c6bd689-5055-4acd-8fdb-c9801c4276f1",
+              "leftValue": "={{ $json.sources }}",
+              "rightValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1952,
+        304
+      ],
+      "id": "3dd59db8-7f55-41b4-aa30-231778f0913f",
+      "name": "If Download Source Selected"
+    },
+    {
+      "parameters": {
+        "url": "https://rabeehasan.online/blog/fetch",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "={{ $('Telegram Trigger').item.json.message.text.replace('Download HTML :: ', '') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2176,
+        304
+      ],
+      "id": "bd60000a-fa79-42b8-ab1c-c67b449cf36a",
+      "name": "HTTP Request Download"
+    },
+    {
+      "parameters": {
+        "jsCode": "const posts = Array.isArray($input.first().json.posts) ? $input.first().json.posts : [];\nconst baseUrl = 'https://rabeehasan.online/blog/download';\nconst maxButtonsPerMessage = 10;\n\nconst truncateTitle = (title) => {\n  if (!title) {\n    return 'Download page';\n  }\n\n  const normalizedTitle = String(title).replace(/\\s+/g, ' ').trim();\n  return normalizedTitle.length > 60 ? `${normalizedTitle.slice(0, 57)}...` : normalizedTitle;\n};\n\nif (!posts.length) {\n  return [\n    {\n      json: {\n        message: 'No posts found for this source.'\n      }\n    }\n  ];\n}\n\nconst output = [];\n\nfor (let index = 0; index < posts.length; index += maxButtonsPerMessage) {\n  const postChunk = posts.slice(index, index + maxButtonsPerMessage);\n\n  output.push({\n    json: {\n      message: index === 0 ? 'Choose a post to download:' : 'More posts to download:',\n      buttons: {\n        inline_keyboard: postChunk.map((post) => {\n          const payload = Buffer.from(JSON.stringify({\n            title: post.title || 'offline-page',\n            url: post.url,\n            source: post.source || ''\n          }), 'utf8').toString('base64url');\n\n          return [\n            {\n              text: truncateTitle(post.title),\n              url: `${baseUrl}?payload=${encodeURIComponent(payload)}`\n            }\n          ];\n        })\n      }\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        304
+      ],
+      "id": "51188085-01f7-420d-a3b9-1fd3dc59668b",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8515581946:AAGsQ8NwZdcQOxvH-_94EncIn6UtUKWV3ps/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ Object.assign({ chat_id: $('Telegram Trigger').item.json.message.from.id, text: $json.message || 'Choose an option:' }, $json.buttons && $json.buttons.keyboard && $json.buttons.keyboard.length ? { reply_markup: { keyboard: $json.buttons.keyboard, resize_keyboard: true, one_time_keyboard: true } } : {}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1952,
+        -16
+      ],
+      "id": "3813c4a3-869a-4365-9dcd-cc64497023b1",
+      "name": "send options to user1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "68473c11-24f3-41cf-bf46-3f2500563649",
+              "name": "sources",
+              "value": "={{ [...$json.rss,  ...$json.web] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        -16
+      ],
+      "id": "cb133937-0290-405b-9eb0-522e708c6eec",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "254b3408-6e9d-4ff8-b572-6e40b7756504",
+              "name": "sources",
+              "value": "={{ $json.sources.map(item => item.name) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1504,
+        -16
+      ],
+      "id": "4342443e-978a-4ea6-95c7-3e047c8ec3bc",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a864ff7-1c5d-4fdd-8838-3b6da3291656",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        80
+      ],
+      "id": "890f3147-2e47-4420-9538-2573af258aea",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cae0a8e3-5753-4310-8fae-f5b81e08e43a",
+              "leftValue": "={{ $json.sources }}",
+              "rightValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1504,
+        176
+      ],
+      "id": "26807aba-c18e-4e27-8dde-fca1ea378a93",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "254b3408-6e9d-4ff8-b572-6e40b7756504",
+              "name": "sources",
+              "value": "={{ [...$json.web, ...$json.rss].map(item => item.name) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        176
+      ],
+      "id": "4a86b908-3638-4b60-954a-96635f6161a3",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8515581946:AAGsQ8NwZdcQOxvH-_94EncIn6UtUKWV3ps/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ Object.assign({ chat_id: $('Telegram Trigger').item.json.message.from.id, text: $json.message }, $json.buttons && $json.buttons.inline_keyboard && $json.buttons.inline_keyboard.length ? { reply_markup: { inline_keyboard: $json.buttons.inline_keyboard } } : {}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2176,
+        176
+      ],
+      "id": "9be483e0-bc5d-4e2c-8fb4-dd5bdb53b7d1",
+      "name": "send options to user2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const posts = Array.isArray($input.first().json.posts) ? $input.first().json.posts : [];\nconst maxButtonsPerMessage = 10;\n\nconst truncateTitle = (title) => {\n  if (!title) {\n    return 'Open post';\n  }\n\n  const normalizedTitle = String(title).replace(/\\s+/g, ' ').trim();\n  return normalizedTitle.length > 60 ? `${normalizedTitle.slice(0, 57)}...` : normalizedTitle;\n};\n\nif (!posts.length) {\n  return [\n    {\n      json: {\n        message: 'No posts found for this source.'\n      }\n    }\n  ];\n}\n\nconst output = [];\n\nfor (let index = 0; index < posts.length; index += maxButtonsPerMessage) {\n  const postChunk = posts.slice(index, index + maxButtonsPerMessage);\n\n  output.push({\n    json: {\n      message: index === 0 ? 'Choose a post:' : 'More posts:',\n      buttons: {\n        inline_keyboard: postChunk.map((post) => ([\n          {\n            text: truncateTitle(post.title),\n            url: post.url\n          }\n        ]))\n      }\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        176
+      ],
+      "id": "19883c1b-d659-45e6-901a-cfad64791b15",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "send options to user1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send options to user1": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Build Start Menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Fetch Blog Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Start Menu": {
+      "main": [
+        [
+          {
+            "node": "send options to user1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Fetch Blog Posts": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Download HTML Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Download HTML Pages": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields Download Sources",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields Download Sources": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields Download Sources2": {
+      "main": [
+        [
+          {
+            "node": "If Download Source Selected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Download Source Selected": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request Download",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "HTTP Request Download": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields Download Sources2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "send options to user2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "send options to user2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "864bbdb6-2faa-4286-ab1d-10f7934fea75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "582bb7ea81a9757591d8011425cf96d0e79faf17dc6ac58ad3403ec4d8ba780c"
+  },
+  "id": "CRIk31N4_sIBRsd0Xp3ux",
+  "tags": []
+}
